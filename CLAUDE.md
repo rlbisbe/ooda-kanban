@@ -6,6 +6,8 @@
 
 **New code must maintain 80% coverage** (lines, branches, and functions). `npm test` enforces this — it will fail if coverage drops below the threshold.
 
+**Always verify new UI features manually with agent-browser** before committing. Start the server, run through the affected interactions, and take a screenshot as evidence.
+
 ## Run
 
 ```bash
@@ -66,8 +68,28 @@ agent-browser screenshot shot.png --full     # full-page screenshot
 agent-browser eval "document.title"          # run arbitrary JS
 ```
 
-**Typical workflow for verifying a new feature:**
-1. `agent-browser open http://localhost:3000`
-2. `agent-browser snapshot -i` — find the refs for the elements you want to interact with
-3. Issue `click`, `fill`, `press` commands using `@ref` notation
-4. `agent-browser snapshot -i` again to confirm the UI updated correctly
+**Required workflow for every UI change:**
+```bash
+# 1. Start the server
+npm run dev
+
+# 2. Open the app
+agent-browser open http://localhost:3000
+
+# 3. Take a baseline screenshot
+agent-browser screenshot --full
+
+# 4. Exercise the changed feature — examples:
+agent-browser snapshot -i                                        # orient with refs
+agent-browser drag '[data-column="todo"] .card' '[data-column="doing"]'  # drag-and-drop
+agent-browser click '[data-column="todo"] .card-title'          # inline edit
+agent-browser fill '.card-title-input' "New title" && agent-browser press Enter
+agent-browser click '[data-column="todo"] .add-card-btn'        # add card
+agent-browser fill '[data-column="todo"] .add-card-form input' "Task" && agent-browser press Enter
+agent-browser get text '[data-column="doing"] .card-count'      # verify count
+
+# 5. Take a final screenshot to confirm the result
+agent-browser screenshot --full
+```
+
+CSS selectors work anywhere a `<sel>` is accepted — prefer them over `@ref` for readability in documented workflows.

@@ -87,6 +87,33 @@ class KanbanBoard extends HTMLElement {
       this.#bindEvents()
     })
 
+    this.querySelectorAll('.column').forEach(col => {
+      col.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+        col.classList.add('drag-over')
+      })
+
+      col.addEventListener('dragleave', (e) => {
+        if (!col.contains(e.relatedTarget)) {
+          col.classList.remove('drag-over')
+        }
+      })
+
+      col.addEventListener('drop', (e) => {
+        e.preventDefault()
+        col.classList.remove('drag-over')
+        const cardId = e.dataTransfer.getData('text/plain')
+        const targetColumn = col.dataset.column
+        const card = this.#cards.find(c => c.id === cardId)
+        if (card && card.column !== targetColumn) {
+          this.dispatchEvent(new CustomEvent('card-move', {
+            detail: { id: cardId, column: targetColumn }
+          }))
+        }
+      })
+    })
+
     this.querySelectorAll('.add-card-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const column = btn.closest('.column')

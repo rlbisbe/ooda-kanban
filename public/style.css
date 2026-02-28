@@ -41,10 +41,19 @@ kanban-board {
 
 /* Column */
 .column {
-  background: #e4e6ea;
   border-radius: 10px;
   padding: 1rem;
   min-height: 200px;
+  transition: outline 0.1s, background 0.2s;
+}
+
+.column[data-column="todo"]  { background: #dde4f0; }
+.column[data-column="doing"] { background: #fde9c0; }
+.column[data-column="done"]  { background: #d4edda; }
+
+.column.drag-over {
+  outline: 2px dashed #888;
+  outline-offset: -3px;
 }
 
 .column-header {
@@ -126,11 +135,17 @@ kanban-card {
   border-radius: 8px;
   padding: 0.75rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.15s, opacity 0.15s;
+  cursor: grab;
 }
 
 .card:hover {
   box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+kanban-card.dragging .card {
+  opacity: 0.4;
+  cursor: grabbing;
 }
 
 .card-title {

@@ -184,6 +184,35 @@ describe('kanban-card', () => {
   })
 })
 
+  test('card div has draggable attribute', () => {
+    const el = makeCard()
+    assert.equal(el.querySelector('.card').getAttribute('draggable'), 'true')
+  })
+
+  test('dragstart stores card id in dataTransfer', () => {
+    const el = makeCard({ id: '5' })
+    const stored = {}
+    const e = new win.Event('dragstart', { bubbles: true })
+    e.dataTransfer = { setData: (k, v) => { stored[k] = v }, effectAllowed: 'move' }
+    el.querySelector('.card').dispatchEvent(e)
+    assert.equal(stored['text/plain'], '5')
+  })
+
+  test('dragstart adds dragging class', () => {
+    const el = makeCard()
+    const e = new win.Event('dragstart', { bubbles: true })
+    e.dataTransfer = { setData: () => {}, effectAllowed: 'move' }
+    el.querySelector('.card').dispatchEvent(e)
+    assert.ok(el.classList.contains('dragging'))
+  })
+
+  test('dragend removes dragging class', () => {
+    const el = makeCard()
+    el.classList.add('dragging')
+    el.querySelector('.card').dispatchEvent(new win.Event('dragend', { bubbles: true }))
+    assert.ok(!el.classList.contains('dragging'))
+  })
+
 // ── kanban-board ──────────────────────────────────────────────────────────────
 
 describe('kanban-board', () => {
@@ -283,6 +312,34 @@ describe('kanban-board', () => {
 
     const card = el.querySelector('kanban-card')
     assert.equal(card.getAttribute('title'), 'Renamed')
+  })
+
+  test('drop on a different column fires card-move', async () => {
+    const cards = [{ id: '1', title: 'Task', column: 'todo' }]
+    const el = await makeBoard(cards)
+
+    let captured = null
+    el.addEventListener('card-move', e => { captured = e.detail })
+
+    const dropEvent = new win.Event('drop', { bubbles: true, cancelable: true })
+    dropEvent.dataTransfer = { getData: () => '1', dropEffect: 'move' }
+    el.querySelector('[data-column="doing"]').dispatchEvent(dropEvent)
+
+    assert.deepEqual(captured, { id: '1', column: 'doing' })
+  })
+
+  test('drop on the same column does not fire card-move', async () => {
+    const cards = [{ id: '1', title: 'Task', column: 'todo' }]
+    const el = await makeBoard(cards)
+
+    let captured = null
+    el.addEventListener('card-move', e => { captured = e.detail })
+
+    const dropEvent = new win.Event('drop', { bubbles: true, cancelable: true })
+    dropEvent.dataTransfer = { getData: () => '1', dropEffect: 'move' }
+    el.querySelector('[data-column="todo"]').dispatchEvent(dropEvent)
+
+    assert.equal(captured, null)
   })
 
   test('pressing Escape in add form dismisses it', async () => {

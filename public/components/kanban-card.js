@@ -21,8 +21,8 @@ class KanbanCard extends HTMLElement {
     const colIndex = COLUMNS.indexOf(this.column)
 
     this.innerHTML = `
-      <div class="card">
-        <div class="card-title" title="Click to edit">${escapeHtml(this.title)}</div>
+      <div class="card" draggable="true" title="Click to edit">
+        <div class="card-title">${escapeHtml(this.title)}</div>
         <div class="card-actions">
           <div class="card-move">
             <button class="btn btn-move" data-action="move-left" ${colIndex === 0 ? 'disabled' : ''}>&#8592;</button>
@@ -32,6 +32,18 @@ class KanbanCard extends HTMLElement {
         </div>
       </div>
     `
+
+    const card = this.querySelector('.card')
+
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', this.cardId)
+      e.dataTransfer.effectAllowed = 'move'
+      this.classList.add('dragging')
+    })
+
+    card.addEventListener('dragend', () => {
+      this.classList.remove('dragging')
+    })
 
     this.querySelector('.card-title').addEventListener('click', () => this.#startEdit())
 
