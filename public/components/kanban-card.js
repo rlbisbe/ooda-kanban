@@ -22,7 +22,7 @@ class KanbanCard extends HTMLElement {
 
     this.innerHTML = `
       <div class="card">
-        <div class="card-title">${escapeHtml(this.title)}</div>
+        <div class="card-title" title="Click to edit">${escapeHtml(this.title)}</div>
         <div class="card-actions">
           <div class="card-move">
             <button class="btn btn-move" data-action="move-left" ${colIndex === 0 ? 'disabled' : ''}>&#8592;</button>
@@ -32,6 +32,8 @@ class KanbanCard extends HTMLElement {
         </div>
       </div>
     `
+
+    this.querySelector('.card-title').addEventListener('click', () => this.#startEdit())
 
     this.querySelector('[data-action="move-left"]')?.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('card-move', {
@@ -53,6 +55,46 @@ class KanbanCard extends HTMLElement {
         detail: { id: this.cardId }
       }))
     })
+  }
+
+  #startEdit() {
+    const titleEl = this.querySelector('.card-title')
+    const originalTitle = this.title
+
+    const input = this.ownerDocument.createElement('input')
+    input.type = 'text'
+    input.value = originalTitle
+    input.className = 'card-title-input'
+    titleEl.replaceWith(input)
+    input.focus()
+    input.select()
+
+    let done = false
+
+    const save = () => {
+      if (done) return
+      done = true
+      const newTitle = input.value.trim()
+      if (newTitle && newTitle !== originalTitle) {
+        this.dispatchEvent(new CustomEvent('card-update', {
+          bubbles: true,
+          detail: { id: this.cardId, title: newTitle }
+        }))
+      }
+      this.render()
+    }
+
+    const cancel = () => {
+      if (done) return
+      done = true
+      this.render()
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') save()
+      if (e.key === 'Escape') cancel()
+    })
+    input.addEventListener('blur', save)
   }
 }
 

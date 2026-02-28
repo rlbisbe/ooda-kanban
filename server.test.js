@@ -64,6 +64,22 @@ describe('POST /api/cards', () => {
 })
 
 describe('PATCH /api/cards/:id', () => {
+  test('updates the title', async () => {
+    const app = createApp()
+    const cards = await app.request('/api/cards').then(r => r.json())
+    const target = cards[0]
+
+    const res = await app.request(`/api/cards/${target.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Renamed task' }),
+    })
+    assert.equal(res.status, 200)
+    const updated = await res.json()
+    assert.equal(updated.title, 'Renamed task')
+    assert.equal(updated.id, target.id)
+  })
+
   test('moves a card to a new column', async () => {
     const app = createApp()
     const cards = await app.request('/api/cards').then(r => r.json())

@@ -44,3 +44,30 @@ public            |        |          |         |
 - `server.js` is excluded — it only calls `serve()` and cannot be unit tested.
 - Add backend tests in `server.test.js` for new routes/logic in `app.js`.
 - Add frontend tests in `frontend.test.js` for new component behaviour. Use `makeCard()` / `makeBoard()` helpers and dispatch `CustomEvent`s to simulate user interactions.
+
+## Browser automation (agent-browser)
+
+[`agent-browser`](https://github.com/steel-dev/agent-browser) is available for live browser inspection and manual verification against the running app.
+
+**Start the server first:**
+```bash
+npm run dev
+```
+
+**Key commands:**
+```bash
+agent-browser open http://localhost:3000      # open the app
+agent-browser snapshot -i                    # interactive elements + refs (use this to orient)
+agent-browser click @e4                      # click element by ref from snapshot
+agent-browser fill @e4 "My new task"         # clear and type into a field
+agent-browser press Enter                    # send a key
+agent-browser get text @e1                   # read text content of an element
+agent-browser screenshot shot.png --full     # full-page screenshot
+agent-browser eval "document.title"          # run arbitrary JS
+```
+
+**Typical workflow for verifying a new feature:**
+1. `agent-browser open http://localhost:3000`
+2. `agent-browser snapshot -i` — find the refs for the elements you want to interact with
+3. Issue `click`, `fill`, `press` commands using `@ref` notation
+4. `agent-browser snapshot -i` again to confirm the UI updated correctly

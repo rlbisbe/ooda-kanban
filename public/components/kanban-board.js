@@ -67,6 +67,18 @@ class KanbanBoard extends HTMLElement {
       this.#bindEvents()
     })
 
+    this.addEventListener('card-update', async (e) => {
+      const { id, title } = e.detail
+      await fetch(`/api/cards/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      })
+      this.#cards = this.#cards.map(c => c.id === id ? { ...c, title } : c)
+      this.#render()
+      this.#bindEvents()
+    })
+
     this.addEventListener('card-delete', async (e) => {
       const { id } = e.detail
       await fetch(`/api/cards/${id}`, { method: 'DELETE' })

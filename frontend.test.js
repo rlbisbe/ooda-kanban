@@ -116,6 +116,72 @@ describe('kanban-card', () => {
     el.querySelector('[data-action="delete"]').click()
     assert.deepEqual(captured, { id: '7' })
   })
+
+  test('clicking title shows an input with the current value', () => {
+    const el = makeCard({ title: 'Original' })
+    el.querySelector('.card-title').click()
+    const input = el.querySelector('.card-title-input')
+    assert.ok(input)
+    assert.equal(input.value, 'Original')
+  })
+
+  test('Enter with new title fires card-update and exits edit mode', () => {
+    const el = makeCard({ id: '1', title: 'Original' })
+    el.querySelector('.card-title').click()
+    let captured = null
+    win.document.body.addEventListener('card-update', e => { captured = e.detail })
+    const input = el.querySelector('.card-title-input')
+    input.value = 'Updated'
+    input.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    assert.deepEqual(captured, { id: '1', title: 'Updated' })
+    assert.ok(el.querySelector('.card-title'))
+    assert.ok(!el.querySelector('.card-title-input'))
+  })
+
+  test('Enter with unchanged title does not fire card-update', () => {
+    const el = makeCard({ title: 'Same' })
+    el.querySelector('.card-title').click()
+    let captured = null
+    win.document.body.addEventListener('card-update', e => { captured = e.detail })
+    const input = el.querySelector('.card-title-input')
+    input.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    assert.equal(captured, null)
+  })
+
+  test('Enter with empty title does not fire card-update', () => {
+    const el = makeCard({ title: 'Original' })
+    el.querySelector('.card-title').click()
+    let captured = null
+    win.document.body.addEventListener('card-update', e => { captured = e.detail })
+    const input = el.querySelector('.card-title-input')
+    input.value = '   '
+    input.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    assert.equal(captured, null)
+  })
+
+  test('Escape cancels edit without firing card-update', () => {
+    const el = makeCard({ title: 'Original' })
+    el.querySelector('.card-title').click()
+    let captured = null
+    win.document.body.addEventListener('card-update', e => { captured = e.detail })
+    const input = el.querySelector('.card-title-input')
+    input.value = 'Changed'
+    input.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    assert.equal(captured, null)
+    assert.ok(el.querySelector('.card-title'))
+    assert.ok(!el.querySelector('.card-title-input'))
+  })
+
+  test('blur saves a changed title', () => {
+    const el = makeCard({ id: '1', title: 'Original' })
+    el.querySelector('.card-title').click()
+    let captured = null
+    win.document.body.addEventListener('card-update', e => { captured = e.detail })
+    const input = el.querySelector('.card-title-input')
+    input.value = 'Blur saved'
+    input.dispatchEvent(new win.Event('blur'))
+    assert.deepEqual(captured, { id: '1', title: 'Blur saved' })
+  })
 })
 
 // ── kanban-board ──────────────────────────────────────────────────────────────
@@ -203,6 +269,20 @@ describe('kanban-board', () => {
     const cards = el.querySelector('[data-column="todo"]').querySelectorAll('kanban-card')
     assert.equal(cards.length, 1)
     assert.equal(cards[0].getAttribute('title'), 'Brand new card')
+  })
+
+  test('card-update patches title and re-renders', async () => {
+    const cards = [{ id: '1', title: 'Original', column: 'todo' }]
+    const el = await makeBoard(cards)
+
+    el.dispatchEvent(new win.CustomEvent('card-update', {
+      bubbles: true,
+      detail: { id: '1', title: 'Renamed' },
+    }))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const card = el.querySelector('kanban-card')
+    assert.equal(card.getAttribute('title'), 'Renamed')
   })
 
   test('pressing Escape in add form dismisses it', async () => {

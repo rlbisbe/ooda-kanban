@@ -137,6 +137,26 @@ kanban-card {
   font-size: 0.9rem;
   line-height: 1.4;
   word-break: break-word;
+  cursor: pointer;
+}
+
+.card-title:hover {
+  text-decoration: underline dotted #aaa;
+}
+
+.card-title-input {
+  width: 100%;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-family: inherit;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  outline: none;
+}
+
+.card-title-input:focus {
+  border-color: #1a1a2e;
 }
 
 .card-actions {
