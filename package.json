@@ -1,0 +1,16 @@
+{
+  "name": "ooda-kanban",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 server.test.js frontend.test.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.7.0"
+  }
+}

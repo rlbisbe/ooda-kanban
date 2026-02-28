@@ -1,0 +1,195 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+header {
+  background: #1a1a2e;
+  color: #fff;
+  padding: 1rem 2rem;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+main {
+  padding: 2rem;
+}
+
+/* Board */
+kanban-board {
+  display: block;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Column */
+.column {
+  background: #e4e6ea;
+  border-radius: 10px;
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.column-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+}
+
+.column-count {
+  font-size: 0.75rem;
+  background: #ccc;
+  color: #555;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-weight: 600;
+}
+
+.column-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 80px;
+}
+
+/* Add card form */
+.add-card-form {
+  margin-top: 0.75rem;
+}
+
+.add-card-form input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #fff;
+  outline: none;
+}
+
+.add-card-form input:focus {
+  border-color: #1a1a2e;
+}
+
+.add-card-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.4rem;
+  background: transparent;
+  border: 1px dashed #aaa;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.add-card-btn:hover {
+  background: #d8dce2;
+  border-color: #888;
+  color: #444;
+}
+
+/* Card */
+kanban-card {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: box-shadow 0.15s;
+}
+
+.card:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.card-title {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.6rem;
+  gap: 0.25rem;
+}
+
+.card-move {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  transition: background 0.15s;
+}
+
+.btn-move {
+  background: #eef0f5;
+  color: #555;
+}
+
+.btn-move:hover {
+  background: #d8dce6;
+}
+
+.btn-move:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ccc;
+  padding: 0.25rem 0.4rem;
+}
+
+.btn-delete:hover {
+  background: #fee;
+  color: #e55;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  color: #888;
+  padding: 2rem;
+  font-size: 0.9rem;
+}
