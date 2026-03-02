@@ -1,0 +1,10 @@
+[default.build.parameters]
+no_use_container = true
+cached = true
+
+[default.deploy.parameters]
+region = "eu-west-1"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+no_confirm_changeset = true
+no_fail_on_empty_changeset = true

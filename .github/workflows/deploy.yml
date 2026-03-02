@@ -1,0 +1,85 @@
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  test:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    needs: test
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    outputs:
+      app-url: ${{ steps.get-url.outputs.app-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Set stack name
+        id: stack
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "name=ooda-kanban-pr-${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=ooda-kanban" >> $GITHUB_OUTPUT
+          fi
+
+      - run: sam build
+
+      - run: sam deploy --stack-name ${{ steps.stack.outputs.name }}
+
+      - name: Get app URL
+        id: get-url
+        run: |
+          URL=$(aws cloudformation describe-stacks \
+            --stack-name ${{ steps.stack.outputs.name }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`AppUrl`].OutputValue' \
+            --output text)
+          echo "app-url=$URL" >> $GITHUB_OUTPUT
+          echo "Deployed to $URL"
+
+  teardown:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Delete PR stack
+        run: |
+          aws cloudformation delete-stack \
+            --stack-name ooda-kanban-pr-${{ github.event.pull_request.number }}

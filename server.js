@@ -1,8 +1,9 @@
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { createApp } from './app.js'
+import { createMemoryStorage } from './storage/memory.js'
 
-const app = createApp()
+const app = createApp(createMemoryStorage())
 
 app.use('/*', serveStatic({ root: './public' }))
 

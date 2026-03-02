@@ -1,10 +1,11 @@
-import { test, describe, beforeEach } from 'node:test'
+import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import { createApp } from './app.js'
+import { createMemoryStorage } from './storage/memory.js'
 
 describe('GET /api/cards', () => {
   test('returns the seed cards', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards')
     assert.equal(res.status, 200)
     const body = await res.json()
@@ -13,7 +14,7 @@ describe('GET /api/cards', () => {
   })
 
   test('each card has id, title, and column', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards')
     const body = await res.json()
     for (const card of body) {
@@ -26,7 +27,7 @@ describe('GET /api/cards', () => {
 
 describe('POST /api/cards', () => {
   test('creates a card and returns 201', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -40,7 +41,7 @@ describe('POST /api/cards', () => {
   })
 
   test('respects the column when provided', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -51,7 +52,7 @@ describe('POST /api/cards', () => {
   })
 
   test('new card appears in GET /api/cards', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     await app.request('/api/cards', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +66,7 @@ describe('POST /api/cards', () => {
 
 describe('PATCH /api/cards/:id', () => {
   test('updates the title', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const cards = await app.request('/api/cards').then(r => r.json())
     const target = cards[0]
 
@@ -81,7 +82,7 @@ describe('PATCH /api/cards/:id', () => {
   })
 
   test('moves a card to a new column', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const cards = await app.request('/api/cards').then(r => r.json())
     const target = cards[0]
 
@@ -97,7 +98,7 @@ describe('PATCH /api/cards/:id', () => {
   })
 
   test('returns 404 for unknown id', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards/nonexistent', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -109,7 +110,7 @@ describe('PATCH /api/cards/:id', () => {
 
 describe('DELETE /api/cards/:id', () => {
   test('removes a card', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const cards = await app.request('/api/cards').then(r => r.json())
     const target = cards[0]
 
@@ -123,7 +124,7 @@ describe('DELETE /api/cards/:id', () => {
   })
 
   test('deleting is idempotent (no error on missing id)', async () => {
-    const app = createApp()
+    const app = createApp(createMemoryStorage())
     const res = await app.request('/api/cards/nonexistent', { method: 'DELETE' })
     assert.equal(res.status, 200)
   })
