@@ -93,3 +93,41 @@ agent-browser screenshot --full
 ```
 
 CSS selectors work anywhere a `<sel>` is accepted — prefer them over `@ref` for readability in documented workflows.
+
+**One-time setup (per machine):**
+```bash
+agent-browser install   # install Chromium binaries — required before first use
+```
+
+**`open` requires `--headed`** — without it the browser does not launch:
+```bash
+agent-browser open --headed http://localhost:3000
+```
+
+## Git workflow
+
+**Always use pull requests. Never push directly to main.**
+
+```bash
+git checkout -b <branch>   # create feature branch
+# ... make changes, commit ...
+gh pr create               # open PR — triggers preview deploy
+gh pr merge <N> --squash   # merge when CI is green — triggers prod deploy
+```
+
+Each PR gets an isolated CloudFormation stack (`ooda-kanban-pr-{N}`) that is torn down automatically when the PR closes.
+
+## Deployment
+
+| Environment | Stack name | URL |
+|---|---|---|
+| Production | `ooda-kanban` | `https://52uaislu10.execute-api.eu-west-1.amazonaws.com` |
+| PR preview | `ooda-kanban-pr-{N}` | printed in deploy job output |
+
+**Lambda runs DynamoDB — there is no seed data.** Empty boards on a fresh deploy are expected and correct.
+
+## AWS / SAM gotchas
+
+- `samconfig.toml` must have `version = 0.1` as the first line — SAM throws `SamConfigVersionException` without it.
+- `package.json` must have a `"version"` field — SAM's `NpmPack` step fails without it.
+- SAM config uses `no_use_container = true` to avoid requiring Docker locally and in CI.
