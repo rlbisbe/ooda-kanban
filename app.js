@@ -12,14 +12,15 @@ export function createApp(storage) {
 
   app.post('/api/cards', async (c) => {
     const { title, column = 'todo' } = await c.req.json()
-    const card = { id: Date.now().toString(), title, column }
+    const now = Date.now()
+    const card = { id: now.toString(), title, column, updatedAt: now }
     return c.json(await storage.create(card), 201)
   })
 
   app.patch('/api/cards/:id', async (c) => {
     const { id } = c.req.param()
     const updates = await c.req.json()
-    const card = await storage.update(id, updates)
+    const card = await storage.update(id, { ...updates, updatedAt: Date.now() })
     return card ? c.json(card) : c.json({ error: 'Not found' }, 404)
   })
 

@@ -38,6 +38,7 @@ describe('POST /api/cards', () => {
     assert.equal(card.title, 'New task')
     assert.equal(card.column, 'todo')
     assert.ok(card.id)
+    assert.ok(card.updatedAt)
   })
 
   test('respects the column when provided', async () => {
@@ -79,6 +80,7 @@ describe('PATCH /api/cards/:id', () => {
     const updated = await res.json()
     assert.equal(updated.title, 'Renamed task')
     assert.equal(updated.id, target.id)
+    assert.ok(updated.updatedAt)
   })
 
   test('moves a card to a new column', async () => {
