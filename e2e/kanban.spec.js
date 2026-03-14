@@ -15,6 +15,7 @@ async function switchToBoard(page) {
   await page.waitForSelector('.board')
 }
 
+
 test.describe('Kanban board', () => {
   const createdIds = []
 
