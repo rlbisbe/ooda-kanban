@@ -58,7 +58,7 @@ jobs:
 
       - run: sam build
 
-      - run: sam deploy --stack-name ${{ steps.stack.outputs.name }}
+      - run: sam deploy --stack-name ${{ steps.stack.outputs.name }} --no-fail-on-empty-changeset
 
       - name: Get app URL
         id: get-url
